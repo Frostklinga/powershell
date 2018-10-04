@@ -1,32 +1,6 @@
 #
 # Based on the script take from this website: http://www.isolation.se/change-mac-address-with-powershell-of-a-wireless-adapter/
-# Modified by Daniel Frostklinga
-# Date: 2018-08-05
-# 
 #
-#
-#
-    #Useful commands:
-    #Get-WmiObject -Class Win32_NetworkAdapterConfiguration | Where-Object { $_.IpEnabled -eq $true -and $_.DhcpEnabled -eq $true}
-    #Get-NetAdapter | Where-Object Name -eq "Wi-Fi" | Select-Object -Property *
-    #Get-Member
-    #Get-NetAdapter | Select-Object -Property MediaType | ForEach { $_.GetType() } Eller $foo | Get-TypeData
-# Write-Host "New IP addresses" ($WIFI.IPAddress | Select-Object -first 1)  -ForegroundColor Yellow 
-
-# Write-Host "IP Adress with first 1: " ($WIFI.IPAddress) -first 1  -ForegroundColor Red
-        # Write-Host "IP Adress without first 1: " ($WIFI.IPAddress)  -ForegroundColor Red
-        # Write-Host "IP class: " ($WIFI.IP)  -ForegroundColor Red
-        # Write-Host "Adapter default gateway: " ($WIFI.DefaultIPGateway)  -ForegroundColor Red
-
-        # $netAdapters = (Get-WmiObject -Class Win32_NetworkAdapterConfiguration | Where-Object { $_.IpEnabled -eq $true -and $_.DhcpEnabled -eq $true } | Select-Object *).MacAddress.replace(":","-")
-        # $netAdapters | ForEach-Object {
-        #     if($WifiMacaddress -eq $_)
-        #     {
-        #         $this.$NetAdapterConfiguration = Where-Object -Value $WifiMacaddress -EQ $_
-        #     }
-            
-        # }
-
 class WirelessNetworkAdapterManager {
     [string]$CurrentSSID
     [string]$CurrentMacAddress
@@ -39,7 +13,6 @@ class WirelessNetworkAdapterManager {
         $this.UpdateNetadapterConfiguration()
         $this.UpdateSSID()
     }
-
     [void] UpdateNetadapterConfiguration () {
         $this.CurrentMacAddress = (Get-NetAdapter | Where-Object MediaType -EQ "Native 802.11").MacAddress
         $this.NetAdapter = (Get-NetAdapter | Where-Object MediaType -EQ "Native 802.11")
@@ -103,9 +76,11 @@ class WirelessNetworkAdapterManager {
     {
         if (Test-NetConnection -ComputerName $probe -CommonTCPPort HTTP -InformationLevel Detailed) { 
             $this.IsConnectionWorking = $true;
+            Write-Host "Connection is working!"
         } 
         else { 
             $this.IsConnectionWorking = $false;
+            Write-Host "Connection is not working..."
         }
     }
     [void] disconnectWifi() 
