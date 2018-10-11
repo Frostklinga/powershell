@@ -63,7 +63,7 @@ class WirelessNetworkAdapterManager {
                 $NumberInListOfNetworks = Read-Host "Choose a SSID from the list. SSID [number] "
             }
             $SelectedNetwork = [int]$NumberInListOfNetworks;
-            return ($networkList[$SelectedNetwork-1] -replace ".* ",'')
+            return ($networkList[$SelectedNetwork-1] -replace "(SSID\s\d{1,3}\s\:\s)",'')
         }
         Catch{
             Write-Host "An error occured during the selection of a network.";
