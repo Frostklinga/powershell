@@ -21,8 +21,7 @@ class WirelessNetworkAdapterManager {
     [Object] GetWifiNetworkAdapter() {
         return $this.NetAdapter;
     }
-    [string] GetSSID()
-    {
+    [string] GetSSID(){
         return $this.CurrentSSID;
     }
     [void] UpdateSSID(){
@@ -74,7 +73,8 @@ class WirelessNetworkAdapterManager {
 
     [void] TestWifi ($probe)
     {
-        if (Test-NetConnection -ComputerName $probe -CommonTCPPort HTTP -InformationLevel Detailed) { 
+        $result = (Test-NetConnection -ComputerName $probe -CommonTCPPort HTTP -InformationLevel Detailed) | Select-Object -ExpandProperty PingSucceeded
+        if ($result) { 
             $this.IsConnectionWorking = $true;
             Write-Host "Connection is working!"
         } 
@@ -190,20 +190,28 @@ class WirelessNetworkAdapterManager {
     #End of class
 }
 
+function AskYesOrNo($pQuestion)
+{
+    $choice = ""
+    Write-Host $pQuestion
+    while ($choice -ne "1" -and $choice -ne "2"){
+        Write-Host "1: Yes" -ForegroundColor Green
+        Write-Host "2: No(Default)" -ForegroundColor Red
+        $choice = Read-Host "Choice"
+        if ($choice -eq ""){
+            $choice = "2"
+        }
+    }
+    return $choice
+}
+
 function HasAdminPrivileges()
 {
     if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator"))
     {
-        $UserInput = ""
-        Write-Host "Current instance of powershell is not running with admin privileges, would you like us to escalate them for you?"
-        Write-Host "1: Yes" -ForegroundColor Green
-        Write-Host "2: No(Default)" -ForegroundColor Red
-        $UserInput = Read-Host "Answer: "
+        $UserInput = AskYesOrNo("Current instance of powershell is not running with admin privileges, would you like us to escalate them for you?")
         if($UserInput -eq "1"){
-            Write-Host $MyInvocation.MyCommand.Path
-            # Start-Process powershell.exe "-File",('"{0}"' -f $MyInvocation.MyCommand.Path) -Verb RunAs
             Start-Process powershell.exe "-NoExit -NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs; 
-            # Read-Host "Exit?"
             Exit;
         }
         elseif($UserInput -eq "2") {
@@ -237,11 +245,11 @@ $WirelessAdapter = [WirelessNetworkAdapterManager]::new()
 
 if(!$WirelessAdapter.IsConnected)
 {
-    $WirelessAdapter.SetRandomMac();
-    Write-Host "Would you like to connect to a network?"
-    Write-Host "Yes: 1"
-    Write-Host "No: 2"
-    $WouldLikeToConnect = Read-Host "Connect? "
+    $UserDesiresARandomMac = AskYesOrNo("Would you like to set a random MAC-Address?")
+    if($UserDesiresARandomMac -eq "1"){
+        $WirelessAdapter.SetRandomMac();
+    }
+    $WouldLikeToConnect = AskYesOrNo("Would you like to connect to a network?")
     if($WouldLikeToConnect -eq "1"){
         $WirelessAdapter.Connect()
         $WirelessAdapter.TestWifi("www.msftncsi.com")
