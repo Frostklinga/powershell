@@ -74,7 +74,10 @@ class WirelessNetworkAdapterManager {
     [void] TestWifi ($probe)
     {
         $result = (Test-NetConnection -ComputerName $probe -CommonTCPPort HTTP -InformationLevel Detailed) | Select-Object -ExpandProperty PingSucceeded
-        if ($result) { 
+        if($true -eq $this.IsConnected){
+            Write-Host "You are currently not connected to a network."
+        }
+        elseif ($result) { 
             $this.IsConnectionWorking = $true;
             Write-Host "Connection is working!"
         } 
