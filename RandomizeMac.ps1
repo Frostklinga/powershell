@@ -114,7 +114,7 @@ class WirelessNetworkAdapterManager {
         #Outputs multiple rows of connection configuration.
         #Current SSID is returned when the connection is completed.
         Write-Host "Connecting to wireless network " $SSID
-        (& netsh wlan connect name=$SSID profile=$SSID)
+        (& netsh wlan connect name=$SSID ssid=$SSID)
 
         #Waiting for the connection process to finish
         Write-Host "Waiting for a connection.."
